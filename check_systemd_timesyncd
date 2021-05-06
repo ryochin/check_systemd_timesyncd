@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 use strict;
+use warnings;
 
 use constant TRUE => 1;
 use constant FALSE => 0;
@@ -61,15 +62,19 @@ sub checkTimedatectlStatus {
     my $lineSystemdServiceActiveFoundAndYes = FALSE;
 
     foreach my $currentLine ( split(/\n/, $output) ) {
-        chomp($currentLine);
+        $currentLine =~ s{\s+$}{}o;
 
-        if ( $currentLine =~ m/synchronized: (.*)/ ) {
+        if ( $currentLine =~ m/synchronized: (.+)/ ) {
             $lineClockSyncFoundAndYes = TRUE if ( $1 eq 'yes' );
             next;
         }
 
-        if ( $currentLine =~ m/service active: (.*)/ ) {
+        if ( $currentLine =~ m/service active: (.+)/ ) {
             $lineSystemdServiceActiveFoundAndYes = TRUE if ( $1 eq 'yes' );
+            next;
+        }
+        elsif ( $currentLine =~ m/NTP service: (.+)/ ) {
+            $lineSystemdServiceActiveFoundAndYes = TRUE if ( $1 eq 'active' );
             next;
         }
     }
